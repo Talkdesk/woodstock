@@ -1,0 +1,61 @@
+buildscript {
+    ext {
+        versionCodeSDK = 1
+        versionNameSDK = '0.0.1'
+        logApiVersion = '0.0.1'
+        kotlinVersion = '1.2.51'
+        androidPluginVersion = '3.1.1'
+        compileAndroidSDkVersion = 27
+        targetAndroidSDkVersion = 27
+        minimumAndroidSDkVersion = 15
+        androidBuildToolsVersion = '27.0.3'
+        rxJavaVersion = '2.1.9'
+        spekVersion = '1.1.5'
+        jUnitPlatformRunnerVersion = '1.0.1'
+        jUnitJupiterApiVersion = '5.0.1'
+        mockitoKotlinVersion = '1.6.0'
+        mockitoCoreVersion = '2.21.0'
+        androidJunit5Version = '1.0.32'
+        okhttpVersion = '3.10.0'
+        jsonVersion = '20180130'
+        gradleVersion = '4.7'
+        espressoVersion = '3.0.1'
+        supportTestRunnerVersion = '1.0.1'
+        ktlintVersion = '0.23.1'
+        mockitoDexMakerVersion = '2.16.0'
+    }
+
+    repositories {
+        jcenter()
+        google()
+    }
+
+    dependencies {
+        classpath "com.android.tools.build:gradle:$androidPluginVersion"
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        jcenter()
+    }
+}
+task wrapper(type: Wrapper) {
+    gradleVersion = project.gradleVersion
+    distributionUrl = "https://services.gradle.org/distributions/gradle-${project.gradleVersion}-all.zip"
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+
+task publishRelease
+
+publishRelease.dependsOn ':woodstock:publishWoodstockPublicationToMavenRepository', ':clean'
+tasks.findByPath(':woodstock:publishWoodstockPublicationToMavenRepository')?.dependsOn ':woodstock:check', ':woodstock:connectedCheck'
+
+tasks.findByPath(':woodstock:check').dependsOn ':woodstock:assemble'
+tasks.findByPath(':woodstock:connectedCheck').dependsOn ':woodstock:assemble'
+
+tasks.findByPath(':woodstock:preBuild').mustRunAfter ':clean'
