@@ -1,0 +1,137 @@
+buildscript {
+    repositories {
+        google()
+        jcenter()
+        mavenCentral()
+
+    }
+
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+        classpath "de.mannodermaus.gradle.plugins:android-junit5:$androidJunit5Version"
+    }
+}
+
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
+apply plugin: "de.mannodermaus.android-junit5"
+apply plugin: 'maven-publish'
+
+android {
+    buildToolsVersion androidBuildToolsVersion
+    compileSdkVersion compileAndroidSDkVersion
+
+    defaultConfig {
+        minSdkVersion minimumAndroidSDkVersion
+        targetSdkVersion targetAndroidSDkVersion
+        versionCode versionCodeSDK
+        versionName versionNameSDK
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        buildConfigField "String", "DATABASE_FILE_NAME", "\"${project.TALKDESK_SDK_DATABASE_FILE_NAME}\""
+        buildConfigField "int", "DATABASE_VERSION", project.TALKDESK_SDK_DATABASE_VERSION
+        buildConfigField "int", "REMOTE_LOG_THRESHOLD", project.TALKDESK_SDK_REMOTE_LOG_THRESHOLD
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            consumerProguardFiles 'consumer-proguard-rules.pro'
+        }
+    }
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+        test.java.srcDirs += 'src/test/kotlin'
+        androidTest.java.srcDirs += 'src/androidTest/kotlin'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    testOptions {
+        junitPlatform {
+            filters {
+                engines {
+                    include 'spek'
+                }
+            }
+        }
+    }
+}
+
+configurations {
+    ktlint
+}
+
+dependencies {
+    api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
+    api "io.reactivex.rxjava2:rxjava:${rxJavaVersion}"
+    api "com.squareup.okhttp3:okhttp:${okhttpVersion}"
+
+    ktlint "com.github.shyiko:ktlint:$ktlintVersion"
+
+    testImplementation "org.json:json:${jsonVersion}"
+    testImplementation "com.squareup.okhttp3:mockwebserver:${okhttpVersion}"
+    testImplementation "org.jetbrains.spek:spek-api:${spekVersion}"
+    testImplementation "org.jetbrains.spek:spek-junit-platform-engine:${spekVersion}"
+    testImplementation "org.junit.platform:junit-platform-runner:${jUnitPlatformRunnerVersion}"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:${jUnitJupiterApiVersion}"
+    testImplementation "com.nhaarman:mockito-kotlin:${mockitoKotlinVersion}"
+    testImplementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
+    testImplementation "org.mockito:mockito-core:${mockitoCoreVersion}"
+    testImplementation junit5.unitTests()
+    testImplementation junit5.parameterized()
+
+    androidTestImplementation "com.android.support.test:runner:${supportTestRunnerVersion}"
+}
+
+publishing {
+    repositories {
+        maven {
+            url "s3://${TALKDESK_MOBILE_S3_BUCKET_NAME}/${TALKDESK_MOBILE_S3_MAVEN_PATH}"
+            authentication {
+                awsIm(AwsImAuthentication)
+            }
+        }
+    }
+
+    publications {
+        woodstock(MavenPublication) {
+            groupId 'com.talkdesk'
+            artifactId 'woodstock'
+            version versionNameSDK
+            artifact("$buildDir/outputs/aar/woodstock-release.aar")
+            artifact(sourceJar) {
+                classifier "sources"
+            }
+            pom.withXml {
+                def dependenciesNode = asNode().appendNode('dependencies')
+                configurations.api.allDependencies.each {
+                    if (it.group != null && it.name != null && it.version != null && it.version != 'unspecified') {
+                        def dependencyNode = dependenciesNode.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', it.group)
+                        dependencyNode.appendNode('artifactId', it.name)
+                        dependencyNode.appendNode('version', it.version)
+                    }
+                }
+            }
+        }
+    }
+}
+
+task sourceJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier "sources"
+}
+
+task ktlint(type: JavaExec, group: "verification") {
+    description = 'Check Kotlin code style.'
+    args 'src/**/*.kt'
+    main = 'com.github.shyiko.ktlint.Main'
+    classpath = configurations.ktlint
+}
+check.dependsOn ktlint
