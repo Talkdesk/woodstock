@@ -2,37 +2,52 @@ package com.talkdesk.woodstock
 
 /**
  * Implementation of [Logger] abstraction which redirects logs to a collection of loggers.
- * @param loggers collection of used loggers.
  */
-class Woodstock private constructor(private val loggers: Array<Logger>) : Logger() {
-    override fun log(level: LogLevel, message: String) {
-        for (logger in loggers) {
-            logger.log(level, message)
-        }
-    }
+class Woodstock private constructor() {
 
-    override fun setup() {
-        for (logger in loggers) {
-            logger.setup()
-        }
-    }
+    companion object {
 
-    class Builder {
+        const val DEFAULT_TAG = "Woodstock"
 
-        private val loggers: MutableList<Logger> = mutableListOf()
+        private var loggers: Array<Logger> = emptyArray()
 
-        fun addLogger(logger: Logger): Builder {
-            loggers.add(logger)
-            return this
+        fun log(tag: String, level: Logger.LogLevel, message: String) {
+
+            checkSetup()
+
+            for (logger in loggers) {
+                logger.log(tag, level, message)
+            }
         }
 
-        fun build(): Woodstock {
+        fun log(tag: String, level: Logger.LogLevel, exception: Throwable) {
 
+            checkSetup()
+
+            for (logger in loggers) {
+                logger.log(tag, level, exception)
+            }
+        }
+
+        /***
+         * Setup Woodstock.
+         * @param loggers collection of used loggers.
+         */
+        fun setup(loggers: Array<Logger>) {
+
+            Woodstock.loggers = loggers
+
+            checkSetup()
+
+            for (logger in loggers) {
+                logger.setup()
+            }
+        }
+
+        private fun checkSetup() {
             if (loggers.isEmpty()) {
                 throw IllegalStateException("Add at least one " + Logger::class.java.simpleName)
             }
-
-            return Woodstock(loggers.toTypedArray())
         }
     }
 }

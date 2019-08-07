@@ -23,7 +23,7 @@ class BatchLoggerTest : Spek({
             val fakeTimeGenerator = FakeTimeGenerator("27/09/1988")
             val batchLogger = BatchLogger(mockLogPersistence, mock(), Schedulers.trampoline(), true, fakeTimeGenerator, mock(), 99)
 
-            batchLogger.log(Logger.LogLevel.ERROR, "Error happened")
+            batchLogger.log("TEST", Logger.LogLevel.ERROR, "Error happened")
 
             verify(mockLogPersistence).save(Logger.LogLevel.ERROR, "Error happened", "27/09/1988")
         }
@@ -63,11 +63,11 @@ class BatchLoggerTest : Spek({
                 3
             )
             batchLogger.setup()
-            batchLogger.log(Logger.LogLevel.TRACE, "401 - Not Authorized")
+            batchLogger.log("TEST", Logger.LogLevel.TRACE, "401 - Not Authorized")
             verify(mockLogSender, never()).send(any())
-            batchLogger.log(Logger.LogLevel.ERROR, "Network error!")
+            batchLogger.log("TEST", Logger.LogLevel.ERROR, "Network error!")
             verify(mockLogSender, never()).send(any())
-            batchLogger.log(Logger.LogLevel.CUSTOMER, "Talkdesk SDK started.")
+            batchLogger.log("TEST", Logger.LogLevel.CUSTOMER, "Talkdesk SDK started.")
 
             verify(mockLogSender).send(Log("0", Logger.LogLevel.TRACE, "401 - Not Authorized", "timestamp"))
             verify(mockLogSender).send(Log("1", Logger.LogLevel.ERROR, "Network error!", "timestamp"))
@@ -79,7 +79,7 @@ class BatchLoggerTest : Spek({
             val mockLogPersistence = mock<LogPersistence>()
             val batchLogger = BatchLogger(mockLogPersistence, mock(), Schedulers.trampoline(), true, FakeTimeGenerator("01/01/1900"), mock(), 99)
 
-            batchLogger.log(Logger.LogLevel.NETWORK, "401 - Not Authorized")
+            batchLogger.log("TEST", Logger.LogLevel.NETWORK, "401 - Not Authorized")
 
             verify(mockLogPersistence, never()).save(Logger.LogLevel.NETWORK, "401 - Not Authorized", "01/01/1900")
         }
@@ -88,7 +88,7 @@ class BatchLoggerTest : Spek({
             val mockLogPersistence = mock<LogPersistence>()
             val batchLogger = BatchLogger(mockLogPersistence, mock(), Schedulers.trampoline(), false, FakeTimeGenerator("1234"), mock(), 99)
 
-            batchLogger.log(Logger.LogLevel.ERROR, "Error happened")
+            batchLogger.log("TEST", Logger.LogLevel.ERROR, "Error happened")
 
             verify(mockLogPersistence, never()).save(eq(Logger.LogLevel.ERROR), eq("Error happened"), any())
         }

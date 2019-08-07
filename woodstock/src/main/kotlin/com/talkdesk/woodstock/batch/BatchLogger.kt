@@ -1,8 +1,10 @@
 package com.talkdesk.woodstock.batch
 
 import android.content.Context
+import android.os.HandlerThread
 import com.talkdesk.woodstock.BuildConfig
 import com.talkdesk.woodstock.Logger
+import com.talkdesk.woodstock.Woodstock
 import com.talkdesk.woodstock.batch.persistence.LogSQLiteOpenHelper
 import com.talkdesk.woodstock.batch.persistence.SQLiteLogPersistence
 import com.talkdesk.woodstock.batch.sender.ExtraDataProvider
@@ -11,7 +13,7 @@ import com.talkdesk.woodstock.batch.sender.JsonObjectLogConverter
 import com.talkdesk.woodstock.batch.time.SystemTimeGenerator
 import io.reactivex.Completable
 import io.reactivex.Scheduler
-import io.reactivex.schedulers.Schedulers
+import io.reactivex.android.schedulers.AndroidSchedulers
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 
@@ -36,7 +38,7 @@ class BatchLogger internal constructor(
     private val lock: Any = Any()
 ) : Logger() {
 
-    override fun log(level: LogLevel, message: String) {
+    override fun log(tag: String, level: LogLevel, message: String) {
         if (!enabled || level == LogLevel.NETWORK) {
             return
         }
@@ -48,28 +50,28 @@ class BatchLogger internal constructor(
             }
         }.subscribeOn(scheduler)
             .subscribe({
-                internalLogger.log(LogLevel.TRACE, "Persisted log with level: $level and message: $message")
+                internalLogger.log(Woodstock.DEFAULT_TAG, LogLevel.TRACE, "Persisted log with level: $level and message: $message")
             }, { exception ->
-                internalLogger.log(LogLevel.ERROR, exception)
+                internalLogger.log(Woodstock.DEFAULT_TAG, LogLevel.ERROR, exception)
             })
     }
 
     override fun setup() {
-        internalLogger.log(LogLevel.TRACE, "Batch Logger setup. Enabled: $enabled")
+        internalLogger.log(Woodstock.DEFAULT_TAG, LogLevel.TRACE, "Batch Logger setup. Enabled: $enabled")
         Completable.fromAction {
             synchronized(lock) {
                 sendPersistedLogs(logPersistence.getLogs())
             }
         }.subscribeOn(scheduler)
             .subscribe({}, { exception ->
-                internalLogger.log(LogLevel.ERROR, exception)
+                internalLogger.log(Woodstock.DEFAULT_TAG, LogLevel.ERROR, exception)
             })
     }
 
     private fun sendPersistedLogs(threshold: Int) {
         val logs = logPersistence.getLogs()
         if (logs.size >= threshold) {
-            internalLogger.log(LogLevel.TRACE, "${logs.size} logs persisted. $threshold threshold reached.")
+            internalLogger.log(Woodstock.DEFAULT_TAG, LogLevel.TRACE, "${logs.size} logs persisted. $threshold threshold reached.")
             sendPersistedLogs(logs)
         }
     }
@@ -77,18 +79,18 @@ class BatchLogger internal constructor(
     private fun sendPersistedLogs(logs: List<Log>) {
 
         if (logs.isEmpty()) {
-            internalLogger.log(LogLevel.TRACE, "No persisted logs to send.")
+            internalLogger.log(Woodstock.DEFAULT_TAG, LogLevel.TRACE, "No persisted logs to send.")
             return
         }
 
-        internalLogger.log(LogLevel.TRACE, "Sending persisted logs via log sender.")
+        internalLogger.log(Woodstock.DEFAULT_TAG, LogLevel.TRACE, "Sending persisted logs via log sender.")
         for (log in logs) {
             logSender.send(log)
-            internalLogger.log(LogLevel.TRACE, "Sent log with id: ${log.id}, level: ${log.level} and message: ${log.message}")
+            internalLogger.log(Woodstock.DEFAULT_TAG, LogLevel.TRACE, "Sent log with id: ${log.id}, level: ${log.level} and message: ${log.message}")
             logPersistence.remove(log.id)
-            internalLogger.log(LogLevel.TRACE, "Removed log with id: ${log.id}")
+            internalLogger.log(Woodstock.DEFAULT_TAG, LogLevel.TRACE, "Removed log with id: ${log.id}")
         }
-        internalLogger.log(LogLevel.TRACE, "All persisted logs sent successfully.")
+        internalLogger.log(Woodstock.DEFAULT_TAG, LogLevel.TRACE, "All persisted logs sent successfully.")
     }
 
     /**
@@ -96,12 +98,13 @@ class BatchLogger internal constructor(
      */
     class Builder(private val context: Context) {
 
+        private var scheduler: Scheduler? = null
         private var baseUrl: String? = null
         private var extraDataProvider: ExtraDataProvider? = null
         private var enabled: Boolean = true
         private var threshold: Int = BuildConfig.REMOTE_LOG_THRESHOLD
         private var internalLogger: Logger = object : Logger() {
-            override fun log(level: LogLevel, message: String) {
+            override fun log(tag: String, level: LogLevel, message: String) {
             }
 
             override fun setup() {
@@ -139,6 +142,11 @@ class BatchLogger internal constructor(
             return this
         }
 
+        fun setScheduler(scheduler: Scheduler): Builder {
+            this.scheduler = scheduler
+            return this
+        }
+
         /**
          * Validates the values and returns a new [HttpLogSender] instance.
          */
@@ -152,6 +160,12 @@ class BatchLogger internal constructor(
                 throw IllegalStateException("Missing extra data provider.")
             }
 
+            if (scheduler == null) {
+                val thread = HandlerThread("BATCH_LOGGER")
+                thread.start()
+                scheduler = AndroidSchedulers.from(thread.looper)
+            }
+
             val logSender = HttpLogSender(
                 httpClient = OkHttpClient(),
                 baseUrl = baseUrl!!,
@@ -161,7 +175,7 @@ class BatchLogger internal constructor(
             )
             val logPersistence = SQLiteLogPersistence(LogSQLiteOpenHelper(context, BuildConfig.DATABASE_FILE_NAME, BuildConfig.DATABASE_VERSION))
 
-            return BatchLogger(logPersistence, logSender, Schedulers.io(), enabled, SystemTimeGenerator(), internalLogger, threshold)
+            return BatchLogger(logPersistence, logSender, scheduler!!, enabled, SystemTimeGenerator(), internalLogger, threshold)
         }
     }
 }

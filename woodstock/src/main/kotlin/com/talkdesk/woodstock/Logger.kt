@@ -9,17 +9,19 @@ import java.io.PrintStream
 abstract class Logger {
     /**
      * Log a message with the specific log level.
+     * @param tag Used to identify the source of a log message. It usually identifies the class or activity where the log call occurs.
      * @param level log level of the log.
      * @param message message of the log.
      */
-    abstract fun log(level: LogLevel, message: String)
+    abstract fun log(tag: String, level: LogLevel, message: String)
 
     /**
      * Log an exception's stacktrace.
+     * @param tag Used to identify the source of a log message. It usually identifies the class or activity where the log call occurs.
      * @param level log level of the log.
      * @param exception exception to be logged.
      */
-    open fun log(level: LogLevel, exception: Throwable) {
+    open fun log(tag: String, level: LogLevel, exception: Throwable) {
         val outStream = ByteArrayOutputStream()
         outStream.use {
             val printStream = PrintStream(outStream)
@@ -27,7 +29,7 @@ abstract class Logger {
                 exception.printStackTrace(printStream)
             }
 
-            log(level, outStream.toString())
+            log(tag, level, outStream.toString())
         }
     }
 

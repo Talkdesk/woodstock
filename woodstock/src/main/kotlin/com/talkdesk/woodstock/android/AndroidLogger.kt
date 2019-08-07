@@ -5,19 +5,17 @@ import com.talkdesk.woodstock.Logger
 
 /**
  * Implementation of [Logger] abstraction using android's [Log].
- * @param tag Used to identify the source of a log message. It usually identifies the class or activity where the log call occurs.
  * @param internalLogsEnabled Controls if logging is enabled.
  * @param customerLogEnabled Controls if internal debug logs are enabled.
  * @param chunkSize Android [Log] has a limitation of String characters so if the message is bigger than this limit it will be partially printed.
  * To solve this we need to split the message into chunks. This is the chunk size in number of characters.
  */
 open class AndroidLogger(
-    private val tag: String,
     private val customerLogEnabled: Boolean,
     private val internalLogsEnabled: Boolean,
     private val chunkSize: Int
 ) : Logger() {
-    override fun log(level: LogLevel, message: String) {
+    override fun log(tag: String, level: LogLevel, message: String) {
         if (customerLogEnabled && level == LogLevel.CUSTOMER) {
             val messageChunks = messageToChunks(message)
             messageChunks.forEach { Log.i(tag, it) }
@@ -38,7 +36,7 @@ open class AndroidLogger(
     }
 
     override fun setup() {
-        log(LogLevel.TRACE, "Android Logger setup. TAG: $tag, customer logs enabled: $customerLogEnabled, internal logs enabled: $internalLogsEnabled and chunk size: $chunkSize")
+        log("TEST", LogLevel.TRACE, "Android Logger setup. Customer logs enabled: $customerLogEnabled, internal logs enabled: $internalLogsEnabled and chunk size: $chunkSize")
     }
 
     private fun messageToChunks(message: String): MutableList<String> {
