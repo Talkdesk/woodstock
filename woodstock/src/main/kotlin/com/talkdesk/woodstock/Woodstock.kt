@@ -12,18 +12,12 @@ class Woodstock private constructor() {
         private var loggers: Array<Logger> = emptyArray()
 
         fun log(tag: String, level: Logger.LogLevel, message: String) {
-
-            checkSetup()
-
             for (logger in loggers) {
                 logger.log(tag, level, message)
             }
         }
 
         fun log(tag: String, level: Logger.LogLevel, exception: Throwable) {
-
-            checkSetup()
-
             for (logger in loggers) {
                 logger.log(tag, level, exception)
             }
@@ -37,16 +31,8 @@ class Woodstock private constructor() {
 
             Woodstock.loggers = loggers
 
-            checkSetup()
-
             for (logger in loggers) {
                 logger.setup()
-            }
-        }
-
-        private fun checkSetup() {
-            if (loggers.isEmpty()) {
-                throw IllegalStateException("Add at least one " + Logger::class.java.simpleName)
             }
         }
     }
