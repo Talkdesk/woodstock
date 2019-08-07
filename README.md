@@ -5,20 +5,13 @@
 Woodstock can have as many `Logger` implementations as you want. Configure `Woodstock` as follows: 
 
 ```kotlin
-val logger: Logger
-
-logger = Woodstock.Builder()
-	.addLogger(androidLogger)
-	.addLogger(batchLogger)
-	.build()
-
-logger.setup()
+Woodstock.setup(arrayOf(androidLogger, batchLogger))
 ```
 
-After `Woodstock` is configured it can be used as normal `Logger` implementation:
+After `Woodstock` is configured it can be used as normal logger:
 
 ```kotlin
-logger.log(LogLevel.TRACE, "My beautiful log.")
+Woodstock.log("My TAG", LogLevel.TRACE, "My beautiful log.")
 ```
 
 Woodstock comes with two off-the-shelf  `Logger` implementations:
@@ -28,7 +21,7 @@ Woodstock comes with two off-the-shelf  `Logger` implementations:
 `AndroidLogger` logs to Logcat:
 
 ```kotlin
-val androidLogger = AndroidLogger("My TAG", true, true, 4000)
+val androidLogger = AndroidLogger(true, true, 4000)
 ```
 
 ### Batch Logger
@@ -41,7 +34,7 @@ val batchLogger = BatchLogger.Builder(context)
                 .setExtraDataProvider(extraDataProvider)
                 .setInternalLogger(internalLogger)
                 .setEnabled(true)
-				.setThreshold(30)
+								.setThreshold(30)
                 .build()
 ```
 
@@ -81,7 +74,7 @@ repositories {
 }
 
 dependencies {
-	implementation 'com.talkdesk:woodstock:0.0.1'
+	implementation 'com.talkdesk:woodstock:0.1.0'
 }
 ```
 

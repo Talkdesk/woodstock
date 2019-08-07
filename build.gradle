@@ -1,15 +1,16 @@
 buildscript {
     ext {
-        versionCodeSDK = 1
-        versionNameSDK = '0.0.1'
+        versionCodeSDK = 2
+        versionNameSDK = '0.1.0'
         logApiVersion = '0.0.1'
-        kotlinVersion = '1.2.51'
+        kotlinVersion = '1.3.41'
         androidPluginVersion = '3.1.1'
         compileAndroidSDkVersion = 27
         targetAndroidSDkVersion = 27
         minimumAndroidSDkVersion = 15
         androidBuildToolsVersion = '27.0.3'
         rxJavaVersion = '2.1.9'
+        rxJavaAndroidVersion = '2.0.2'
         spekVersion = '1.1.5'
         jUnitPlatformRunnerVersion = '1.0.1'
         jUnitJupiterApiVersion = '5.0.1'
