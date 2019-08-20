@@ -10,7 +10,7 @@ buildscript {
         minimumAndroidSDkVersion = 15
         androidBuildToolsVersion = '27.0.3'
         rxJavaVersion = '2.1.9'
-        rxJavaAndroidVersion = '2.0.2'
+        rxJavaAndroidVersion = '2.1.0'
         spekVersion = '1.1.5'
         jUnitPlatformRunnerVersion = '1.0.1'
         jUnitJupiterApiVersion = '5.0.1'
