@@ -1,5 +1,6 @@
 package com.talkdesk.woodstock.batch
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.HandlerThread
 import com.talkdesk.woodstock.BuildConfig
@@ -27,6 +28,7 @@ import okhttp3.OkHttpClient
  * @param internalLogger logger to log internal information about this [BatchLogger]. It should not be an instance of
  * [BatchLogger] otherwise this instance could end up in an inconsistent state.
  */
+@SuppressLint("CheckResult")
 class BatchLogger internal constructor(
     private val logPersistence: LogPersistence,
     private val logSender: LogSender,
