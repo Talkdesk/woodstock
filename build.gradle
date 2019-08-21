@@ -51,11 +51,6 @@ task clean(type: Delete) {
     delete rootProject.buildDir
 }
 
-task publishRelease
-
-publishRelease.dependsOn ':woodstock:publishWoodstockPublicationToMavenRepository', ':clean'
-tasks.findByPath(':woodstock:publishWoodstockPublicationToMavenRepository')?.dependsOn ':woodstock:check', ':woodstock:connectedCheck'
-
 tasks.findByPath(':woodstock:check').dependsOn ':woodstock:assemble'
 tasks.findByPath(':woodstock:connectedCheck').dependsOn ':woodstock:assemble'
 
