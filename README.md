@@ -77,23 +77,3 @@ dependencies {
 	implementation 'com.talkdesk:woodstock:0.1.0'
 }
 ```
-
-## Deploy
-
-### AWS Authentication
-
-As part of the deploy of the Woodstock library some files are uploaded to a mobile AWS S3 production bucket. For security reasons each team member should have its own credentials to [AWS Console](https://console.aws.amazon.com/console/home?region=us-east-1), which can be provided by *SRE team*.
-
-When you receive your credentials you should follow [AWS Access](https://talkdesk.atlassian.net/wiki/spaces/SEC/pages/117938393/AWS+Access) wiki page to setup your AWS account. In order to access Mobile team specific resources you need to perform a [switch-role](https://talkdesk.atlassian.net/wiki/spaces/SEC/pages/117938393/AWS+Access#AWSAccess-Mobile). When accessing AWS Console the authentication and switch-role can be performed manually, but in order to perform a deploy locally you need to authenticate using [td-cli](https://github.com/Talkdesk/td-cli) command line tool:
-
-```
-td auth aws auth
-```
-
-After you perform the authentication **td-cli** will create a `~HOME/.aws/credentials` file with your temporary credentials to access AWS resources. To configure a switch-role you need to setup a **prd** AWS profile in `~HOME/.aws/config` file. The contents for the file can be found [here](https://github.com/Talkdesk/talkdesk-sec-confs/blob/master/aws/iam/auth/groups/mobile/config).
-
-**Note:** CI application does not need to switch-role and therefore uses the **default** AWS profile. To deploy the library locally with your credentials you need to set **TALKDESK\_SDK\_AWS\_PROFILE** in `gradle.properties` to **prd**.
-
-### Release
-
-The release of Woodstock library is done manually by logging in AWS console and uploading the AAR files according to Maven structure. In the future releases will be automatically deployed via CI (when a tag is created with format **X.Y.Z**). The release deploy will be triggered via CI using Gradle wrapper command `./gradlew publishRelease`. 
