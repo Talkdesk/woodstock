@@ -69,11 +69,7 @@ class CustomLogger() : Logger() {
 ### Gradle
 
 ```groovy
-repositories {
-    maven { url 'https://mobile-dev.talkdeskapp.com/android/maven' }
-}
-
 dependencies {
-	implementation 'com.talkdesk:woodstock:0.1.0'
+	implementation 'com.talkdesk:woodstock:0.1.3'
 }
 ```
