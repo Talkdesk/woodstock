@@ -23,6 +23,7 @@ buildscript {
         supportTestRunnerVersion = '1.0.1'
         ktlintVersion = '0.23.1'
         mockitoDexMakerVersion = '2.16.0'
+        nexusStagingVersion = '0.21.0'
     }
 
     repositories {
@@ -32,8 +33,11 @@ buildscript {
 
     dependencies {
         classpath "com.android.tools.build:gradle:$androidPluginVersion"
+        classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:$nexusStagingVersion"
     }
 }
+
+apply plugin: 'io.codearte.nexus-staging'
 
 allprojects {
     repositories {
@@ -50,3 +54,11 @@ tasks.findByPath(':woodstock:check').dependsOn ':woodstock:assemble'
 tasks.findByPath(':woodstock:connectedCheck').dependsOn ':woodstock:assemble'
 
 tasks.findByPath(':woodstock:preBuild').mustRunAfter ':clean'
+
+apply from: 'publish.gradle'
+
+nexusStaging {
+    packageGroup "$WOODSTOCK_GROUP_ID.$WOODSTOCK_ARTIFACT_ID"
+    username rootProject.ext.publishProps.sonatypeUsername
+    password rootProject.ext.publishProps.sonatypePassword
+}
