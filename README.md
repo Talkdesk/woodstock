@@ -34,7 +34,7 @@ val batchLogger = BatchLogger.Builder(context)
                 .setExtraDataProvider(extraDataProvider)
                 .setInternalLogger(internalLogger)
                 .setEnabled(true)
-								.setThreshold(30)
+		.setThreshold(30)
                 .build()
 ```
 
