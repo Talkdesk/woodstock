@@ -75,3 +75,7 @@ google-services.json
 
 # Fabric
 fabric.properties
+
+# Publish stuff
+publish.properties
+*.gpg

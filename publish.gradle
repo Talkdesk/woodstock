@@ -1,0 +1,14 @@
+def props = new Properties()
+try {
+    file("$project.rootDir/publish.properties").withInputStream { props.load(it) }
+} catch (ignored) {
+    props.putAll([signingKey      : '', signingPassword: '', secretKeyRingFile: '',
+                  sonatypeUsername: '', sonatypePassword: ''])
+}
+
+ext {
+    ext.publishProps = props
+    ext."signing.keyId" = publishProps.signingKey
+    ext."signing.secretKeyRingFile" = "$project.rootDir/$publishProps.secretKeyRingFile"
+    ext."signing.password" = publishProps.signingPassword
+}
