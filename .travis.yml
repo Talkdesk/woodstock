@@ -10,7 +10,8 @@ before_install:
   - mkdir "$ANDROID_HOME/licenses" || true
   - echo "24333f8a63b6825ea9c5514f83c2829b004d1fee" > "$ANDROID_HOME/licenses/android-sdk-license"
   # Decrypt publish required credentials.
-  - ./cmds/decrypt.sh
+  - openssl aes-256-cbc -K $encrypted_3c47f12a66a7_key -iv $encrypted_3c47f12a66a7_iv -in publish.properties.enc -out publish.properties -d
+  - openssl aes-256-cbc -K $encrypted_3c47f12a66a7_key -iv $encrypted_3c47f12a66a7_iv -in publish_keys.gpg.enc -out publish_keys.gpg -d
 
 script:
   - if [[ "$TRAVIS_PULL_REQUEST" != "false" ]]; then
