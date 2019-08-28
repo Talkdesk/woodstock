@@ -1,5 +1,7 @@
 # Woodstock
 
+[![Build Status](https://travis-ci.com/Talkdesk/woodstock.svg?branch=master)](https://travis-ci.com/Talkdesk/woodstock)
+
 ## Usage
 
 Woodstock can have as many `Logger` implementations as you want. Configure `Woodstock` as follows: 
