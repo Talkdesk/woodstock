@@ -12,3 +12,4 @@ ext {
     ext."signing.secretKeyRingFile" = "$project.rootDir/$publishProps.secretKeyRingFile"
     ext."signing.password" = publishProps.signingPassword
 }
+

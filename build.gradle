@@ -62,3 +62,4 @@ nexusStaging {
     username rootProject.ext.publishProps.sonatypeUsername
     password rootProject.ext.publishProps.sonatypePassword
 }
+
