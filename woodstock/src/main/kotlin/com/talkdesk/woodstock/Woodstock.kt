@@ -1,3 +1,5 @@
+@file:Suppress("NOTHING_TO_INLINE")
+
 package com.talkdesk.woodstock
 
 /**
@@ -22,6 +24,26 @@ class Woodstock private constructor() {
                 logger.log(tag, level, exception)
             }
         }
+
+        /** Send an ERROR log message. */
+        inline fun e(tag: String, message: String) = log(tag, Logger.LogLevel.ERROR, message)
+
+        /** Send a TRACE log message. */
+        inline fun t(tag: String, message: String) = log(tag, Logger.LogLevel.TRACE, message)
+
+        inline fun customer(tag: String, message: String) = log(tag, Logger.LogLevel.CUSTOMER, message)
+
+        inline fun net(tag: String, message: String) = log(tag, Logger.LogLevel.NETWORK, message)
+
+        /** Send an ERROR log message. */
+        inline fun e(tag: String, exception: Throwable) = log(tag, Logger.LogLevel.ERROR, exception)
+
+        /** Send a TRACE log message. */
+        inline fun t(tag: String, exception: Throwable) = log(tag, Logger.LogLevel.TRACE, exception)
+
+        inline fun customer(tag: String, exception: Throwable) = log(tag, Logger.LogLevel.CUSTOMER, exception)
+
+        inline fun net(tag: String, exception: Throwable) = log(tag, Logger.LogLevel.NETWORK, exception)
 
         /***
          * Setup Woodstock.
