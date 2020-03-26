@@ -36,7 +36,7 @@ val batchLogger = BatchLogger.Builder(context)
                 .setExtraDataProvider(extraDataProvider)
                 .setInternalLogger(internalLogger)
                 .setEnabled(true)
-		.setThreshold(30)
+                .setThreshold(30)
                 .build()
 ```
 
@@ -72,6 +72,6 @@ class CustomLogger() : Logger() {
 
 ```groovy
 dependencies {
-	implementation 'com.talkdesk:woodstock:0.1.3'
+	implementation 'com.talkdesk:woodstock:0.1.4'
 }
 ```
